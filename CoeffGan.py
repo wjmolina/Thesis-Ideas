@@ -75,7 +75,7 @@ class G(torch.nn.Module):
     def forward(self, x):
         x = torch.relu(self.fc1(x.view(- 1, self.g_in)))
         x = torch.relu(self.fc2(x))
-        return torch.tanh(self.alg_img(self.fc3(x)))
+        return torch.sigmoid(self.alg_img(self.fc3(x)))
 
 d_in = 64
 d = D(d_in)
@@ -92,8 +92,8 @@ epochs = 500
 d_epochs = 5
 g_epochs = 5
 
-training_size = 1
-training_batch_size = 1
+training_size = 1000
+training_batch_size = 100
 training_set = deg_4_algebraic_shapes(- 2, 2, d_in, d_in, g_in, training_size)
 training_generator = torch.utils.data.DataLoader(training_set, batch_size=training_batch_size, shuffle=True)
 
@@ -138,8 +138,8 @@ for epoch in range(epochs):
             g_loss_cnt += 1
 
     print('d', '%f' % (d_loss_r / d_loss_cnt), 'g', '%f' % (g_loss_r / g_loss_cnt), epoch + 1, '/', epochs)
-    torch.save(d.state_dict(), 'GanSanityCheckD.pt')
-    torch.save(g.state_dict(), 'GanSanityCheckG.pt')
+    # torch.save(d.state_dict(), 'GanSanityCheckD.pt')
+    # torch.save(g.state_dict(), 'GanSanityCheckG.pt')
 
 # Testing
 
