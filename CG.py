@@ -23,8 +23,8 @@ def construct_image(coeffs, basis):
     return expit(np.einsum('i,ijk->jk', coeffs, basis))
 
 def reconstruct(ndwspl, ker, orig, basis):
-    loss = lambda coeffs: np.square(np.subtract(signal.fftconvolve(construct_image(coeffs, basis), ker, mode='valid'), ndwspl)).mean()
-    result = minimize(loss, np.random.randn(15) * 3, method='CG', options={'disp': True})
+    loss = lambda coeffs: np.square(np.subtract(signal.fftconvolve(construct_image(coeffs, basis), ker, mode='valid'), ndwspl)).mean() / 2
+    result = minimize(loss, np.random.randn(15) * 3, method='CG', tol=1e-6, options={'disp': True})
     return result.x
 
 orig = get_stably_bounded_image(- 5, 5, - 5, 5, 512, 512)
@@ -37,7 +37,7 @@ plt.show()
 
 ker = get_gaussian_kernel(257)
 dwspl = signal.fftconvolve(orig, ker, mode='valid')
-ndwspl = dwspl + np.random.randn(* dwspl.shape) * .05
+ndwspl = dwspl + np.random.randn(* dwspl.shape) * .0
 
 plt.imshow(ndwspl)
 plt.gray()
