@@ -75,35 +75,52 @@ kernel = tools.get_gaussian_kernel(33, 5)
 model = my_cnn()
 model.load_state_dict(torch.load('model1'))
 model.eval()
+
 training_x = []
 training_y = []
 training_n = []
-x = tools.get_stably_bounded_shape(- 3, 3, - 3, 3, 64, 64)
+
+########################################################################### temp
+# x = tools.get_stably_bounded_shape(- 3, 3, - 3, 3, 64, 64)
+x = plt.imread('lab.bmp')[:, :, 0] / 255
+###########################################################################
+
 training_x.append(x)
+
 y = signal.fftconvolve(x, kernel, mode='valid')
 training_y.append(y)
+
 n = np.random.randn(* y.shape) * n_level
 training_n.append(n)
+
 training_x = np.array(training_x)
 training_x = torch.from_numpy(training_x).view(- 1, 1, * training_x[0].shape).float()
+
 training_y = np.array(training_y)
 training_y = torch.from_numpy(training_y).view(- 1, 1, * training_y[0].shape).float()
+
 training_n = np.array(training_n)
 training_n = torch.from_numpy(training_n).view(- 1, 1, * training_n[0].shape).float()
+
 n_output = model(training_y + training_n)
+
 imgin = (training_y + training_n).view(32, 32)
 imgout = n_output.view(64, 64).round().detach()
 imgorig = training_x.view(64, 64)
+
 plt.figure()
 plt.imshow(imgin)
 plt.gray()
 plt.title('imgin')
+
 plt.figure()
 plt.imshow(imgorig)
 plt.gray()
 plt.title('imgorig')
+
 plt.figure()
 plt.imshow(abs(imgout - imgorig))
 plt.gray()
 plt.title('err')
+
 plt.show()
