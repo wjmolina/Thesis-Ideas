@@ -1,3 +1,5 @@
+# Last time I used this was to make an image for Dr. Mang.
+
 import matplotlib.pyplot as plt
 import numpy as np
 import tools
@@ -41,7 +43,6 @@ class my_cnn(torch.nn.Module):
 # training_y = torch.from_numpy(training_y).view(- 1, 1, * training_y[0].shape).float()
 # training_n = np.array(training_n)
 # training_n = torch.from_numpy(training_n).view(- 1, 1, * training_n[0].shape).float()
-
 # # Train
 # n_epochs = 1000
 # model = my_cnn()
@@ -57,7 +58,6 @@ class my_cnn(torch.nn.Module):
 #     optimizer.step()
 #     print(i, '/', n_epochs, loss.item())
 # torch.save(model.state_dict(), 'model1')
-
 # # Display
 # for i in range(10):
 #     n_input = training_x[i][0]
@@ -76,50 +76,42 @@ kernel = tools.get_gaussian_kernel(33, 5)
 model = my_cnn()
 model.load_state_dict(torch.load('model1'))
 model.eval()
-
 training_x = []
 training_y = []
 training_n = []
-
 for _ in range(10):
-    x = tools.get_stably_bounded_shape(- 3, 3, - 3, 3, 64, 64)
+    x = tools.get_stably_bounded_shape(- 2, 2, - 2, 2, 64, 64)
     training_x.append(x)
-
     y = signal.fftconvolve(x, kernel, mode='valid')
     training_y.append(y)
-
     n = np.random.randn(* y.shape) * n_level
     training_n.append(n)
-
 training_x = np.array(training_x)
 training_x = torch.from_numpy(training_x).view(- 1, 1, * training_x[0].shape).float()
-
 training_y = np.array(training_y)
 training_y = torch.from_numpy(training_y).view(- 1, 1, * training_y[0].shape).float()
-
 training_n = np.array(training_n)
 training_n = torch.from_numpy(training_n).view(- 1, 1, * training_n[0].shape).float()
-
-# # plt.figure()
-# # plt.imshow(network_input)
-# # plt.gray()
-# # plt.title('network_input')
-
-# # plt.figure()
-# # plt.imshow(original_image)
-# # plt.gray()
-# # plt.title('original_image')
-
-# # plt.figure()
-# # plt.imshow(abs(network_output - original_image))
-# # plt.gray()
-# # plt.title('err')
-
-# # plt.show()
-
-
-
-
+original_image = training_x[0].reshape(64, 64)
+network_input = (training_y[0] + training_n[0]).reshape(32, 32)
+network_output = model(network_input.reshape(1, 1, 32, 32)).round()
+plt.figure()
+plt.axis('off')
+plt.gray()
+plt.imshow(network_input)
+plt.figure()
+plt.axis('off')
+plt.gray()
+plt.imshow(original_image)
+plt.figure()
+plt.axis('off')
+plt.gray()
+plt.imshow(network_output.detach().reshape(64, 64))
+plt.figure()
+plt.axis('off')
+plt.gray()
+plt.imshow(abs(network_output - original_image).detach().reshape(64, 64))
+plt.show()
 
 # fig = plt.figure(figsize=(5, 5))
 # columns = 3
@@ -151,20 +143,20 @@ training_n = torch.from_numpy(training_n).view(- 1, 1, * training_n[0].shape).fl
 
 # plt.show()
 
-fig, ax = plt.subplots(figsize=(8, 8))
-plt.axis('off')
+# fig, ax = plt.subplots(figsize=(8, 8))
+# plt.axis('off')
 
-def animate(i):
-    network_input = (training_y[0] + training_n[i]).view(32, 32)
-    n_output = model((training_y[0] + training_n[i]).view(- 1, 1, 32, 32))
-    network_output = n_output.view(64, 64).round().detach()
-    original_image = training_x[0].view(64, 64)
-    fig.add_subplot(1, 2, 1)
-    plt.imshow(network_input)
-    plt.axis('off')
-    fig.add_subplot(1, 2, 2)
-    plt.imshow(network_output)
-    plt.axis('off')
+# def animate(i):
+#     network_input = (training_y[0] + training_n[i]).view(32, 32)
+#     n_output = model((training_y[0] + training_n[i]).view(- 1, 1, 32, 32))
+#     network_output = n_output.view(64, 64).round().detach()
+#     original_image = training_x[0].view(64, 64)
+#     fig.add_subplot(1, 2, 1)
+#     plt.imshow(network_input)
+#     plt.axis('off')
+#     fig.add_subplot(1, 2, 2)
+#     plt.imshow(network_output)
+#     plt.axis('off')
 
-ani = animation.FuncAnimation(fig, animate, np.arange(0, 9), interval=25)
-ani.save('tmp.gif', writer='imagemagick', fps=15)
+# ani = animation.FuncAnimation(fig, animate, np.arange(0, 9), interval=25)
+# ani.save('tmp.gif', writer='imagemagick', fps=15)
