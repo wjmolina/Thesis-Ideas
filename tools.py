@@ -20,3 +20,10 @@ def get_gaussian_kernel(size, window, standard_deviation=1):
 
 def get_image(coefficients, basis):
     return np.einsum('i,ijk->jk', coefficients, basis)
+
+
+def SorensenDiceCoefficient(I, R):
+    TP = sum(sum((I == R) * I)).item()
+    FP = sum(sum((I != R) * R)).item()
+    FN = sum(sum((I != R) * I)).item()
+    return 1 if 2 * TP + FP + FN == 0 else 2 * TP / (2 * TP + FP + FN)
