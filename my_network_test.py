@@ -5,9 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tools
 import torch
+import pandas as pd
+import seaborn as sns
 
 from scipy import signal
 from matplotlib import animation
+from collections import defaultdict
 
 class my_cnn(torch.nn.Module):
     def __init__(self):
@@ -25,15 +28,15 @@ class my_cnn(torch.nn.Module):
         return x
 
 print('generating data')
-n_images = 5000
-noise_level = 0
+n_images = 500
+sigma = .1
 training_x, training_y, training_n, kernel = [], [], [], tools.get_gaussian_kernel(33, 5)
 for _ in range(n_images):
     x = tools.get_stably_bounded_shape(- 3, 3, - 3, 3, 64, 64)
     training_x.append(x)
     y = signal.fftconvolve(x, kernel, mode='valid')
     training_y.append(y)
-    n = np.random.randn(* y.shape) * noise_level
+    n = np.random.normal(0, sigma, y.shape)
     training_n.append(n)
 training_x = np.array(training_x)
 training_x = torch.from_numpy(training_x).view(- 1, 1, * training_x[0].shape).float()
@@ -44,11 +47,21 @@ training_n = torch.from_numpy(training_n).view(- 1, 1, * training_n[0].shape).fl
 
 print('displaying boxplot')
 model = my_cnn()
-model.load_state_dict(torch.load('save/noiseless_1.pth'))
+model.load_state_dict(torch.load('save/normal_noisy_1.pth'))
 data = []
 for i in range(n_images):
     n_input = training_x[i][0]
     n_output = model((training_y + training_n)[i].view(1, * (training_y + training_n)[i].shape)).round().view(64, 64).detach()
     data.append(tools.SorensenDiceCoefficient(n_input, n_output))
-plt.boxplot(data)
+data.sort(reverse=True)
+data = data[: 100]
+
+dff = defaultdict(list)
+for datum in data:
+    dff['Sørensen–Dice Coefficient'].append(datum)
+    dff['Method'].append('Neural Network')
+
+df = pd.read_pickle('pptdata.pkl').append(pd.DataFrame(dff), ignore_index=True)
+flierprops = {'marker': 'o', 'markersize': 1.25, 'markeredgewidth': 0}
+sns.boxplot(x='Method', y='Sørensen–Dice Coefficient', data=df, palette='cubehelix', flierprops=flierprops)
 plt.show()

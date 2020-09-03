@@ -25,14 +25,14 @@ class my_cnn(torch.nn.Module):
 
 print('generating training data')
 training_size = 5000
-noise_level = .01
+noise_level = .1
 training_x, training_y, training_n, kernel = [], [], [], tools.get_gaussian_kernel(33, 5)
 for _ in range(training_size):
     x = tools.get_stably_bounded_shape(- 3, 3, - 3, 3, 64, 64)
     training_x.append(x)
     y = signal.fftconvolve(x, kernel, mode='valid')
     training_y.append(y)
-    n = np.random.randn(* y.shape) * noise_level
+    n = np.random.normal(0, noise_level, y.shape)
     training_n.append(n)
 training_x = np.array(training_x)
 training_x = torch.from_numpy(training_x).view(- 1, 1, * training_x[0].shape).float()
@@ -44,7 +44,7 @@ training_n = torch.from_numpy(training_n).view(- 1, 1, * training_n[0].shape).fl
 print('training')
 n_epochs = 500
 model = my_cnn()
-model.load_state_dict(torch.load('save/noiseless_1.pth'))
+# model.load_state_dict(torch.load('save/normal_noisy_1.pth'))
 optimizer = torch.optim.AdamW(model.parameters())
 loss_function = torch.nn.MSELoss()
 loss_data = []
@@ -57,7 +57,7 @@ for i in range(n_epochs):
     optimizer.step()
     print(i + 1, '/', n_epochs, loss.item())
     loss_data.append(loss.item())
-torch.save(model.state_dict(), 'save/noiseless_1.pth')
+torch.save(model.state_dict(), 'save/normal_noisy_1.pth')
 
 print('displaying')
 for i in range(10):
