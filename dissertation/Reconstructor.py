@@ -11,8 +11,15 @@ class Reconstructor(Plotter):
         self.kind = kind
         if kind == 'Power':
             self.basis = self.get_bivariate_basis(4, 0, 512, 0, 512)
-            self.kernel = pickle.load(open('Power/PowerKernel.pkl', 'rb'))
-            self.moment = pickle.load(open('Power/PowerMomentMatrix.pkl', 'rb'))
+            try:
+                print('loading data')
+                self.kernel = pickle.load(open('Power/PowerKernel.pkl', 'rb'))
+                self.moment = pickle.load(open('Power/PowerMomentMatrix.pkl', 'rb'))
+            except:
+                print('loading data failed. creating data')
+                from PowerPKL import kernel, moment
+                self.kernel = kernel
+                self.moment = moment
         elif kind == 'Separable':
             self.basis = self.get_separable_basis(4, 0, 512, 0, 512)
             self.kernel = pickle.load(open('Separable/SeparableKernel.pkl', 'rb'))

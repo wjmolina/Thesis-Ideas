@@ -12,10 +12,9 @@ def is_bounded(image):
     return False, image
 
 
-def generate_images(file_name):
+def generate_images(file_name, n_images):
     x, y = np.meshgrid(np.linspace(- 2, 2, 513), np.linspace(- 2, 2, 513))
     basis = [x ** i * y ** j for i in range(5) for j in range(5 - i)]
-    n_images = 100
     shapes = []
     for i in range(n_images):
         print('Generating Images', i + 1, '/', n_images)
